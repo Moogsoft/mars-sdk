@@ -1,0 +1,27 @@
+{
+    "name": "@moogsoft/mars-sdk",
+    "version": "0.1.0",
+    "description": "Utilities to use with Moogsoft Collector MARs",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "jest"
+    },
+    "contributors": [
+        "Kit Freddura <kit.freddura@moogsoft.com>",
+        "Richard Whitehead <reverend@moogsoft.com>",
+        "Charlie Powicki <charlie.powicki@moogsoft.com>"
+    ],
+    "license": "MIT",
+    "devDependencies": {
+        "eslint": "^6.3.0",
+        "eslint-config-airbnb-base": "^14.0.0",
+        "eslint-plugin-import": "^2.18.2",
+        "eslint-plugin-jest": "^24.1.0",
+        "jest": "^26.5.0",
+        "test-console": "^1.1.0"
+    },
+    "dependencies": {},
+    "directories": {
+        "test": "test"
+    }
+}

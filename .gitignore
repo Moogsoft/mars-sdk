@@ -1,0 +1,12 @@
+# Build
+/build/
+/**/build
+
+# VSCode
+.vscode
+.project
+.settings
+
+# Node
+**/node_modules
+**/dist
