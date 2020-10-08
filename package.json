@@ -2,7 +2,7 @@
     "name": "@moogsoft/mars-sdk",
     "version": "0.1.0",
     "description": "Utilities to use with Moogsoft Collector MARs",
-    "main": "src/index.js",
+    "main": "index.js",
     "scripts": {
         "test": "jest"
     },
