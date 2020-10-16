@@ -8,7 +8,8 @@
         "url": "https://github.com/Moogsoft/mars-sdk"
     },
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "lint": "eslint . --ext .js"
     },
     "contributors": [
         "Kit Freddura <kit.freddura@moogsoft.com>",

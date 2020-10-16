@@ -7,50 +7,61 @@
 /* eslint camelcase: ["error", {allow: ["additional_data"]}] */
 
 /**
-  * A Metric is a point of timeseries data processed and anomalized on by the collector
-  * @property {Number} value The datapoint of the metric
-  * @property {String} name The name of the metric
-  * @property {String} source The source of the metric
-  * @property {String} key [Optional] A key of the metric,
-  *                 for example the specific core for a 'cpu' metric
-  * @property {Number} timestamp [Optional] The timestamp of the metric,
-  *                 defaults to the current time
-  * @property {String} description A description of the metric
-  * @property {String} timezone [Optional] The timezone of the metric,
-  *                 defaults to the current timezone
-  * @property {Object} additional_data [Optional] A mapping of additional
-  *                 contextual data for this metric
-  * @property {Object} tags [Optional] Tag metadata for this metric
-  * @property {String} type The type of the metric, must be one of COUNTER or GAUGE
-  * @property {String} unit [Optional] An optional unit for this metric
-  * @property {Number} window [Optional] Sets the window of this metric for the anti-datalake
-  *                 settings of the collector
-  */
+ * Valid metric types
+ */
+const VALID_METRIC_TYPES = ['c', 'g', 'counter', 'gauge'];
+
+/**
+ * A Metric is a point of timeseries data processed and anomalized on by the collector
+ * @property {Number} data The datapoint of the metric
+ * @property {String} metric The name of the metric
+ * @property {String} source The source of the metric
+ * @property {String} key [Optional] A key of the metric,
+ *                 for example the specific core for a 'cpu' metric
+ * @property {Number} time [Optional] The timestamp of the metric,
+ *                 defaults to the current time
+ * @property {String} description A description of the metric
+ * @property {String} utc_offset [Optional] The timezone of the metric,
+ *                 defaults to the current timezone
+ * @property {Object} additional_data [Optional] A mapping of additional
+ *                 contextual data for this metric
+ * @property {Object} tags [Optional] Tag metadata for this metric
+ * @property {String} type The type of the metric, must be one of COUNTER or GAUGE
+ * @property {String} unit [Optional] An optional unit for this metric
+ * @property {Number} window [Optional] Sets the window of this metric for the anti-datalake
+ *                 settings of the collector
+ */
 class Metric {
     /**
      * Constructor
      */
     constructor() {
-        this.value = undefined;
-        this.name = undefined;
+        this.data = undefined;
+        this.metric = undefined;
         this.source = undefined;
         this.key = undefined;
-        this.timestamp = undefined;
+        // eslint-disable-next-line camelcase
+        this.utc_offset = undefined;
         this.description = undefined;
-        this.timezone = undefined;
         this.additional_data = undefined;
         this.tags = undefined;
         this.type = undefined;
         this.unit = undefined;
         this.window = undefined;
+        this.time = undefined;
     }
 
     /**
      * Sets the value of this metric
-     * @param {Number} value
+     * @param {Number} data
      */
-    setValue(value) {
-        this.value = value;
+    setData(data) {
+        if (typeof data === 'string') {
+            const parsed = parseFloat(data);
+            this.data = Number.isNaN(parsed) ? null : parsed;
+        } else {
+            this.data = data;
+        }
         return this;
     }
 
@@ -58,8 +69,8 @@ class Metric {
      * Sets the name of this metric
      * @param {String} name
      */
-    setName(name) {
-        this.name = name;
+    setMetric(name) {
+        this.metric = name;
         return this;
     }
 
@@ -85,8 +96,8 @@ class Metric {
      * Sets the timestamp for this metric, defaults to the current time
      * @param {Number} ts
      */
-    setTimestamp(ts) {
-        this.timestamp = ts;
+    setTime(ts) {
+        this.time = ts;
         return this;
     }
 
@@ -100,11 +111,12 @@ class Metric {
     }
 
     /**
-     * Sets the timezone of this metric, defaults to the current timezone
-     * @param {String} tz
+     * Sets the UTC offset of this metric, defaults to the current timezone's offset
+     * @param {String} offset
      */
-    setTimezone(tz) {
-        this.timezone = tz;
+    setUtcOffset(offset) {
+        // eslint-disable-next-line camelcase
+        this.utc_offset = offset;
         return this;
     }
 
@@ -185,33 +197,53 @@ class Metric {
     }
 
     /**
-     * Constructs and returns a Metric
+     * Validates the metric, confirming it has values for
+     * required fields, and provided values are appropriately typed
      */
-    build() {
-        if (this.value == null) {
-            throw new Error('`value` must be set in metric');
-        } else if (this.name == null) {
-            throw new Error('`name` must be set in metric');
-        } else {
-            return {
-                value: this.value,
-                name: this.name,
-                source: this.source,
-                key: this.key,
-                timestamp: this.timestamp,
-                description: this.description,
-                timezone: this.timezone,
-                additional_data: this.additional_data,
-                tags: this.tags,
-                type: this.type,
-                unit: this.unit,
-                window: this.window,
-            };
+    validate() {
+        // Validate required fields
+        if (this.data && this.data.constructor.name === 'Bitmask') {
+            this.data.validate();
+        } else if (!['number', 'boolean'].includes(typeof this.data)) {
+            throw new Error('A Bitmask, Number, or Boolean value for field `data` is required');
         }
-    }
 
-    static builder() {
-        return new Metric();
+        if (typeof this.metric !== 'string') {
+            throw new Error('A string value for field `metric` is required');
+        }
+
+        // Validate optional fields
+        if (this.key && typeof this.key !== 'string') {
+            throw new Error('`key` must be a string');
+        }
+
+        if (this.source && typeof this.source !== 'string') {
+            throw new Error('`source` must be a string');
+        }
+
+        if (this.time && typeof this.time !== 'number') {
+            throw new Error('`time` must be a number');
+        }
+
+        if (this.description && typeof this.description !== 'string') {
+            throw new Error('`description` must be a string');
+        }
+
+        if (this.type && !VALID_METRIC_TYPES.includes(this.type)) {
+            throw new Error('`type` must be one of [`c`, `g`, `counter`, `gauge`]');
+        }
+
+        if (this.utc_offset && typeof this.utc_offset !== 'string') {
+            throw new Error('`utc_offset` must be a string');
+        }
+
+        if (this.unit && typeof this.unit !== 'string') {
+            throw new Error('`unit` must be a string');
+        }
+
+        if (this.window && typeof this.window !== 'number') {
+            throw new Error('`window` must be a number');
+        }
     }
 }
 
