@@ -134,6 +134,19 @@ function exec(cmd, args) {
 }
 
 /**
+ * Converts the input number to a hex string prefixed with 0x
+ * @param {Number} num -- the input value
+ * @return {String} the hex string
+ */
+function toHex(num) {
+    if (!Number.isInteger(num)) {
+        throw new Error(`toHex must be called with an integral numeric value, input value [${num}] invalid`);
+    } else {
+        return `0x${num.toString(16)}`;
+    }
+}
+
+/**
  * Gets the config sent from the collector and parses it as JSON
  */
 function getConfig() {
@@ -238,12 +251,21 @@ function sendDiscovery(discovery) {
     // Do some validation
     if (typeof discovery === 'undefined' || discovery === null) {
         debug('Received null discovery result');
+    } else if (discovery.constructor.name !== 'DiscoveryResult') {
+        error(`Recieved invalid data in \`sendDiscovery\`, value must be a \`DiscoveryResult\` but received: ${typeof discovery}`);
     } else {
-        const payload = {
-            type: 'discovery',
-            value: jsonParse(discovery),
-        };
-        process.stdout.write(`${JSON.stringify(payload)}\n`);
+        // Validate the result
+        try {
+            discovery.validate();
+
+            const payload = {
+                type: 'discovery',
+                value: jsonParse(discovery),
+            };
+            process.stdout.write(`${JSON.stringify(payload)}\n`);
+        } catch (e) {
+            error(`Received malformed Discovery Result - ${e.message}, cannot send`);
+        }
     }
 }
 
@@ -255,14 +277,31 @@ function sendMetrics(metrics) {
     if (typeof metrics === 'undefined' || metrics === null) {
         debug('Received null metrics, skipping');
     } else {
+        let value = jsonParse(metrics);
+        if (!Array.isArray(value)) value = [value];
+
+        value = value.filter((m) => {
+            try {
+                if (m.constructor.name !== 'Metric') {
+                    debug('Received element that was not a `Metric`, skipping it');
+                    return false;
+                }
+                m.validate();
+                return true;
+            } catch (e) {
+                debug(`Received malformed metric - ${e.message}, skipping`);
+                return false;
+            }
+        });
+
         const payload = {
             type: 'metrics',
-            value: jsonParse(metrics),
+            value,
         };
-        if (!Array.isArray(payload.value)) {
-            payload.value = [payload.value];
+
+        if (payload.value.length > 0) {
+            process.stdout.write(`${JSON.stringify(payload)}\n`);
         }
-        process.stdout.write(`${JSON.stringify(payload)}\n`);
     }
 }
 
@@ -271,13 +310,29 @@ function sendEvents(events) {
     if (typeof events === 'undefined' || events === null) {
         debug('Received null events, skipping');
     } else {
+        let value = jsonParse(events);
+        if (!Array.isArray(value)) value = [value];
+
+        value = value.filter((e) => {
+            try {
+                if (e.constructor.name !== 'Event') {
+                    debug('Received element that was not an `Event`, skipping it');
+                    return false;
+                }
+
+                e.validate();
+                return true;
+            } catch (err) {
+                debug(`Received malformed event - ${err.message}, skipping`);
+                return false;
+            }
+        });
+
         const payload = {
             type: 'events',
-            value: jsonParse(events),
+            value,
         };
-        if (!Array.isArray(payload.value)) {
-            payload.value = [payload.value];
-        }
+
         process.stdout.write(`${JSON.stringify(payload)}\n`);
     }
 }
@@ -405,6 +460,7 @@ function getMarDir() {
  */
 module.exports = {
     isWindows,
+    toHex,
     hasCmd,
     procRunning,
     exec,

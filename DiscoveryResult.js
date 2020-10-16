@@ -1,32 +1,24 @@
 'use strict';
 
 /**
-  * A DiscoveryResult controls what MARs a collector will run, potentially also providing
-  * some insight as to why a MAR is not being run as well as steps to enable it.
   * @module DiscoveryResult
-  * @property {Object} moobs A list of moobs to run in this MAR if multiple are supported
-  * @property {String} moob  The moob to run in this MAR
-  * @property {Reason} reason An optional Reason as to why this MAR's discovery is negative
-  * @property {boolean} active A flag indicating if this MAR should be run or not
   */
+
+/**
+ * A DiscoveryResult controls what MARs a collector will run, potentially also providing
+ * some insight as to why a MAR is not being run as well as steps to enable it.
+ * @property {Array} moobs A list of moobs to run in this MAR if multiple are supported
+ * @property {Reason} reasonDetail An optional Reason as to why this MAR's discovery is negative
+ * @property {boolean} active A flag indicating if this MAR should be run or not
+ */
 class DiscoveryResult {
     /**
-     * Constructor for a DiscoveryResult, though usually the builder methods should be used instead
+     * Constructor
      */
     constructor() {
         this.moobs = undefined;
-        this.moob = undefined;
-        this.reason = undefined;
+        this.reasonDetail = undefined;
         this.active = undefined;
-    }
-
-    /**
-     * Add an array of moobs to the builder
-     * @param {Object} moobs An array of strings
-     */
-    setMoobs(moobs) {
-        this.moobs = moobs;
-        return this;
     }
 
     /**
@@ -34,7 +26,13 @@ class DiscoveryResult {
      * @param {String} moob
      */
     setMoob(moob) {
-        this.moob = moob;
+        if (moob != null) {
+            if (this.moobs == null) {
+                this.moobs = [moob];
+            } else {
+                this.moobs.push(moob);
+            }
+        }
         return this;
     }
 
@@ -66,17 +64,47 @@ class DiscoveryResult {
 
         return {
             moobs: this.moobs,
-            moob: this.moob,
             active: this.active,
             reasonDetail: this.reasonDetail,
         };
     }
 
     /**
-     * Returns a fresh builder instance for creating a DiscoveryResult
+     * Validates the discovery result for correctness
      */
-    static builder() {
-        return new DiscoveryResult();
+    validate() {
+        if (this.active == null) {
+            throw new Error('Field `active` unset but required');
+        }
+
+        if (typeof this.active !== 'boolean') {
+            throw new Error('Field `active` must be a boolean');
+        }
+
+        if (this.active) {
+            if (this.moobs == null || this.moobs.length === 0) {
+                throw new Error('No moobs provided for active DiscoveryResult, must set at least one moob with `setMoob`');
+            }
+
+            this.moobs.forEach((moob) => {
+                if (moob == null) {
+                    throw new Error('null moob provided for active DiscoveryResult, all moobs must be non-empty strings');
+                }
+                if (typeof moob !== 'string') {
+                    throw new Error(`non-string moob: ${moob} for active DiscoveryResult, all moobs must be non-empty strings`);
+                }
+
+                if (!moob) {
+                    throw new Error('empty moob provided for active DiscoveryResult, all moobs must be non-empty strings');
+                }
+            });
+        }
+
+        if (this.reasonDetail != null && this.reasonDetail.constructor.name !== 'Reason') {
+            throw new Error('reason must be of type `Reason`');
+        } else if (this.reasonDetail != null) {
+            this.reasonDetail.validate();
+        }
     }
 }
 

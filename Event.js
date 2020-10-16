@@ -6,31 +6,32 @@
  */
 /* eslint camelcase: ["error", {allow: ["utc_offset","dedupe_key"]}] */
 
+const SEVERITIES = ['clear', 'unknown', 'minor', 'warning', 'major', 'critical'];
+
 /**
-  * An Event sent upstream by the collector for processing in Express,
-  * goes through the Alert phase and deduplication into an Incident
-  * @property {String} severity One of INDETERMINATE, MINOR, WARNING, MAJOR, CRITICAL
-  * @property {String} source The source of the event, which could be something like a hostname,
-  *                 a service name, etc
-  * @property {String} check The check that failed to generate this event, for example "cpu load"
-  * @property {String} description A description of the event
-  * @property {Number} time The timestamp of the event, if omitted defaults to the current time
-  * @param {String} utc_offset The UTC offset of the data, for example +01:00,
-  *                 defaults to the current TZ
-  * @property {String} dedupe_key [Optional] The deduplication key of this event,
-  * used when processing into an Incident
-  * @property {String} manager [Optional] The manager of this event
-  * @property {Object} service [Optional] An array of services impacted by this event
-  * @property {String} alias [Optional] An alias for this event
-  * @property {String} clazz [Optional] The class of this event,
-  *                 for example Storage, AWS, Network, etc
-  * @property {Object} tags [Optional] Key-value pairs of metadata for the event
-  */
+ * An Event sent upstream by the collector for processing in Express
+ *
+ * @property {String} severity One of INDETERMINATE, MINOR, WARNING, MAJOR, CRITICAL
+ * @property {String} source The source of the event, which could be something like a hostname,
+ *                 a service name, etc
+ * @property {String} check The check that failed to generate this event, for example "cpu load"
+ * @property {String} description A description of the event
+ * @property {Number} time The timestamp of the event, if omitted defaults to the current time
+ * @property {String} utc_offset The UTC offset of the data, for example +01:00,
+ *                 defaults to the current TZ
+ * @property {String} dedupe_key [Optional] The deduplication key of this event,
+ * used when processing into an Incident
+ * @property {String} manager [Optional] The manager of this event
+ * @property {Array} service [Optional] An array of services impacted by this event
+ * @property {String} alias [Optional] An alias for this event
+ * @property {String} clazz [Optional] The class of this event,
+ *                 for example Storage, AWS, Network, etc
+ * @property {Object} tags [Optional] Key-value pairs of metadata for the event
+ */
 class Event {
     /**
      * Constructor
      */
-
     constructor() {
         this.severity = undefined;
         this.source = undefined;
@@ -51,7 +52,12 @@ class Event {
      * @param {String} sev
      */
     setSeverity(sev) {
-        this.severity = sev;
+        if (typeof sev === 'string') {
+            this.severity = sev.toLowerCase();
+        } else {
+            this.severity = sev;
+        }
+
         return this;
     }
 
@@ -154,38 +160,72 @@ class Event {
         return this;
     }
 
-    /**
-     * Construct and return a new Event
-     */
-    build() {
+    validate() {
         if (this.severity == null) {
-            throw new Error('`severity` must be set to one of [INDETERMINANT, MINOR, WARNING, MAJOR, CRITICAL]');
-        } else if (this.source == null) {
-            throw new Error('`source` must be set in event');
-        } else if (this.check == null) {
-            throw new Error('`check` must be set in event');
-        } else if (this.description == null) {
-            throw new Error('`description` must be set in event');
-        } else {
-            return {
-                severity: this.severity,
-                source: this.source,
-                check: this.check,
-                description: this.description,
-                time: this.time,
-                utc_offset: this.utc_offset,
-                dedupe_key: this.dedupe_key,
-                manager: this.manager,
-                service: this.service,
-                alias: this.alias,
-                class: this.class,
-                tags: this.tags,
-            };
+            throw new Error('`severity` must be set in an Event');
         }
-    }
 
-    static builder() {
-        return new Event();
+        if (typeof this.severity === 'string' && !SEVERITIES.includes(this.severity)) {
+            throw new Error(`string \`severity\` must be set to one of [${SEVERITIES}]`);
+        } else if (typeof this.severity === 'number' && (!Number.isInteger(this.severity) || this.severity > 5 || this.severity < 0)) {
+            throw new Error('numeric `severity` must be one of [0, 1, 2, 3, 4, 5]');
+        } else if (typeof this.severity !== 'string' && typeof this.severity !== 'number') {
+            throw new Error(`\`severity\` must either be a number from 0 to 5 or one of [${SEVERITIES}]`);
+        }
+
+        if (this.source == null || typeof this.source !== 'string' || this.source === '') {
+            throw new Error('`source` must be set to a non-empty string');
+        }
+
+        if (this.check == null || typeof this.check !== 'string' || this.check === '') {
+            throw new Error('`check` must be set to a non-empty string');
+        }
+
+        if (this.description == null || typeof this.description !== 'string' || this.description === '') {
+            throw new Error('`description` must be set to a non-empty string');
+        }
+
+        if (this.time != null && typeof this.time !== 'number') {
+            throw new Error('`time` must be a number');
+        }
+
+        if (this.utc_offset != null && typeof this.utc_offset !== 'string') {
+            throw new Error('`utf_offset` must be a non-empty offset string if supplied, such as +08:00');
+        }
+
+        if (this.dedupe_key != null && typeof this.dedupe_key !== 'string') {
+            throw new Error('`dedupe_key` must be a non-empty string if supplied');
+        }
+
+        if (this.manager != null && typeof this.manager !== 'string') {
+            throw new Error('`manager` must be a non-empty string if supplied');
+        }
+
+        if (this.service != null) {
+            if (!Array.isArray(this.service) || this.service.length === 0) {
+                throw new Error('`service` must be a non-empty array of strings');
+            }
+
+            this.service.forEach((val) => {
+                if (typeof val !== 'string') {
+                    throw new Error(`Entry in service list ${val} not a string`);
+                }
+            });
+        }
+
+        if (this.alias != null && typeof this.alias !== 'string') {
+            throw new Error('`alias` must be a non-empty string if supplied');
+        }
+
+        if (this.class != null && typeof this.class !== 'string') {
+            throw new Error('`class` must be a non-empty string if supplied');
+        }
+
+        if (this.tags != null) {
+            if (this.tags.constructor !== {}.constructor) {
+                throw new Error('`tags` must be a valid JSON object');
+            }
+        }
     }
 }
 
