@@ -1,5 +1,10 @@
 # MARs SDK Workflows
 
-### Lint
+### Lint and Audit
+Lints the code base with eslint and the provided configuration on every commit and runs an `npm audit`
 
-Lints the code base with eslint and the provided configuration on every commit
+### Test
+Tests the code base with `jest`
+
+### Publish
+Publishes to NPM on a release
