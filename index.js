@@ -147,6 +147,27 @@ function toHex(num) {
 }
 
 /**
+ * Checks if the input string is a hex string prefixed with 0x
+ * @param {String} input - the input string
+ * @return {boolean} true iff the string represents a hex string prefixed with 0x
+ */
+function isHex(input) {
+    if (typeof input !== 'string') {
+        return false;
+    }
+
+    // Now that we know it's a string, validate the prefix
+    if (!input.startsWith('0x')) {
+        return false;
+    }
+
+    const stripped = input.substring(2);
+    const parsed = parseInt(stripped, 16);
+
+    return parsed.toString(16) === stripped;
+}
+
+/**
  * Gets the config sent from the collector and parses it as JSON
  */
 function getConfig() {
@@ -461,6 +482,7 @@ function getMarDir() {
 module.exports = {
     isWindows,
     toHex,
+    isHex,
     hasCmd,
     procRunning,
     exec,
