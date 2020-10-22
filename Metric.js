@@ -6,6 +6,8 @@
  */
 /* eslint camelcase: ["error", {allow: ["additional_data"]}] */
 
+const { isHex } = require('./index');
+
 /**
  * Valid metric types
  */
@@ -204,8 +206,8 @@ class Metric {
         // Validate required fields
         if (this.data && this.data.constructor.name === 'Bitmask') {
             this.data.validate();
-        } else if (!['number', 'boolean'].includes(typeof this.data)) {
-            throw new Error('A Bitmask, Number, or Boolean value for field `data` is required');
+        } else if (!['number', 'boolean'].includes(typeof this.data) && !isHex(this.data)) {
+            throw new Error('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
         }
 
         if (typeof this.metric !== 'string') {

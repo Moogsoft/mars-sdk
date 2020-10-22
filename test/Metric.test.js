@@ -22,7 +22,7 @@ describe('Validation Method', () => {
             .setSource('jest');
 
         expect(validMetric.data).toBe(null);
-        expect(() => validMetric.validate()).toThrow('A Bitmask, Number, or Boolean value for field `data` is required');
+        expect(() => validMetric.validate()).toThrow('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
     });
 
     it('validate: valid full metric', () => {
@@ -56,7 +56,7 @@ describe('Validation Method', () => {
             .setSource('localhost')
             .setData('bad');
 
-        expect(() => invalidMetric.validate()).toThrow('A Bitmask, Number, or Boolean value for field `data` is required');
+        expect(() => invalidMetric.validate()).toThrow('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
     });
 
     it('validate: missing metric name', () => {
@@ -65,6 +65,22 @@ describe('Validation Method', () => {
             .setData(true);
 
         expect(() => invalidMetric.validate()).toThrow('A string value for field `metric` is required');
+    });
+
+    it('validate: hex string', () => {
+        const validMetric = new Metric()
+            .setMetric('valid.metric.1')
+            .setSource('localhost')
+            .setData('0xFF')
+            .setDescription('A test metric')
+            .setKey('disk1')
+            .setTime(1602650044)
+            .setUtcOffset('pst')
+            .setUnit('mb')
+            .setWindow(100)
+            .counter();
+
+        expect(() => validMetric.validate()).not.toThrow();
     });
 
     it('validate: invalid metric type', () => {

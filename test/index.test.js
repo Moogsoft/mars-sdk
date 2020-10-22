@@ -131,7 +131,7 @@ describe('Sender Methods', () => {
         });
 
         expect(output).toStrictEqual([
-            '{"type":"log","level":"debug","msg":"Received malformed metric - A Bitmask, Number, or Boolean value for field `data` is required, skipping"}\n',
+            '{"type":"log","level":"debug","msg":"Received malformed metric - A Bitmask, Number, Hex String, or Boolean value for field `data` is required, skipping"}\n',
             '{"type":"metrics","value":[{"data":false,"metric":"good","source":"localhost"}]}\n',
         ]);
     });
@@ -288,5 +288,13 @@ describe('utilities', () => {
         expect(utils.toHex(15)).toBe('0xf');
         expect(() => utils.toHex(15.1)).toThrow('toHex must be called with an integral numeric value, input value [15.1] invalid');
         expect(() => utils.toHex('test')).toThrow('toHex must be called with an integral numeric value, input value [test] invalid');
+    });
+
+    it('isHex', () => {
+        expect(utils.isHex('abc')).toBe(false);
+        expect(utils.isHex('0xabc')).toBe(true);
+        expect(utils.isHex('0xqqq')).toBe(false);
+        expect(utils.isHex('')).toBe(false);
+        expect(utils.isHex(1)).toBe(false);
     });
 });
