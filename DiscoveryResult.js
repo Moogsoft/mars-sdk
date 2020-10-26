@@ -55,21 +55,6 @@ class DiscoveryResult {
     }
 
     /**
-     * Constructs the DiscoveryResult
-     */
-    build() {
-        if (this.active == null) {
-            throw new Error('must set `active` in DiscoveryResult');
-        }
-
-        return {
-            moobs: this.moobs,
-            active: this.active,
-            reasonDetail: this.reasonDetail,
-        };
-    }
-
-    /**
      * Validates the discovery result for correctness
      */
     validate() {
