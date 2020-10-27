@@ -173,7 +173,7 @@ builder = builder.setActive(false)
     .setReason(Reason.builder()
         .setRecoverable(false)
         .setMsg('redis server process not found')
-        .setType(MISSING_PROCESS)
+        .setType(MISSING_PROCESS);
 ```
 
 #### constants
