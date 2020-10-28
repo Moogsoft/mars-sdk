@@ -121,7 +121,7 @@ const result = new DiscoveryResult()
     .<setMethod(value)>
     [...]
 ```
-A builder class to generate a well formed discovery result object.
+An external class to generate a well formed discovery result object.
 - Returns: `<Object>`
 - Methods:
     - `.setMoob(moob)` *Required* (If single)
@@ -137,40 +137,40 @@ A builder class to generate a well formed discovery result object.
 
 Initialize and turn on a MAR:
 ```javascript
-let builder = DiscoveryResult.builder().setMoob('system').setActive(true);
-builder.build();
+let builder = new DiscoveryResult.setMoob('system').setActive(true);
 ```
 Disable a MAR based on subsequent logic:
 ```javascript
-builder = builder.setActive(false).build();
+builder = builder.setActive(false);
 ```
 
 #### Reason
-A builder class to generate a well formed Reason to be used by the `DiscoveryResult.builder().setReason()` method
+An external class to generate a well formed Reason to be used by the `DiscoveryResult.setReason()` method
 - Returns: `<Object>`
 - Methods:
-    - `.builder()`
-        - Returns a fresh builder instance for creating a `Reason`
     - `.setRecoverable(recoverable)`
         - recoverable: `<boolean>` Is it completely undiscoverable, or should the user be prompted for miising information?
     - `.setMsg(msg)`
         - msg: `<String>` A message that will be presented to the user
     - `.setType(type)`
-        - type: `<String>` A categorization of the type of discovery "failure", types include:
+        - type: `<String>` A categorization of the type of discovery "failure". While this can be any string, the following categores *must* be set from the [constants](#constants) module:
             - INSUFFICIENT_PRIVILEGES
             - INVALID_CREDENTIALS
             - MISSING_CREDENTIALS
             - MISSING_PROCESS
             - MISSING_COMMAND
-    - `.build()`
-        - Builds the object
 
 *Examples:*
 
 Disable a MAR because a process was not detected:
 ```javascript
+const {
+    MISSING_PROCESS,
+    MISSING_COMMAND,
+}  = require('@moogsoft/mars-sdk/constants');
+
 builder = builder.setActive(false)
-    .setReason(Reason.builder()
+    .setReason(new Reason()
         .setRecoverable(false)
         .setMsg('redis server process not found')
         .setType(MISSING_PROCESS);
