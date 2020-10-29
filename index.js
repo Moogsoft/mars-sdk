@@ -10,7 +10,9 @@ const path = require('path');
 
 const constants = fs.constants || fs;
 
-const isWindows = process.platform === 'win32';
+const isWindows = process.platform.toLowerCase() === 'win32';
+const isLinux = process.platform.toLowerCase() === 'linux';
+const isMacOS = process.platform.toLowerCase() === 'darwin';
 
 // Our cached config object
 let MOOG_CREDS_AND_CONFIG = null;
@@ -503,4 +505,6 @@ module.exports = {
     carousel,
     passFilter,
     getMarDir,
+    isLinux,
+    isMacOS,
 };
