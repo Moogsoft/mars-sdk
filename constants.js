@@ -10,6 +10,9 @@ const INVALID_CREDENTIALS = 'Invalid Credentials';
 const MISSING_CREDENTIALS = 'Missing Credentials';
 const MISSING_PROCESS = 'Missing Process';
 const MISSING_COMMAND = 'Missing Command';
+const NO_HTTP_RESPONSE = 'No http(s) response';
+const MISSING_CONFIG = 'Missing configuration item';
+const INVALID_CONFIG = 'Invalid configuration value';
 const COUNTER = 'c';
 const GAUGE = 'g';
 
@@ -19,6 +22,9 @@ module.exports = {
     MISSING_CREDENTIALS,
     MISSING_COMMAND,
     MISSING_PROCESS,
+    NO_HTTP_RESPONSE,
+    MISSING_CONFIG,
+    INVALID_CONFIG,
     COUNTER,
     GAUGE,
 };
