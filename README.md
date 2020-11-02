@@ -59,6 +59,7 @@ const Event = require('@moogsoft/mars-sdk/Event');
 - [JSONToKv](#JSONToKv)
 - [dehumanize](#dehumanize)
 - [jsonParse](#jsonParse)
+- [isInFilter](#isInFilter)
 - [passFilter](#passFilter)
 ### Extended Utilities
 #### REST
@@ -403,19 +404,38 @@ A wrappper for JSON.parse with error handling
 - Returns: `<Object>`
 - string: Input JSON as a string
 
-#### passFilter
+#### isInFilter
 ```javascript
-passFilter(item, flist)
+passFilter(item, filterList)
 ```
+A basic, but very quick exclusion filter
 - Returns: `<Boolean>`
 - item `<String>` The string we're looking for
-- flist `<Array>` An array of regular expressions to test, matching items will be filtered (dropped)
+- filterList `<Array>` An array of regular expressions to test, matching items will be filtered (dropped)
+*Example*
 ```javascript
 mongoStat.filter((m) => passFilter(m.name, filters)).forEach((m) => {
     filteredMongoStat.push(m);
 });
 ```
 Where the filter list is:
+```json
+"filters": [
+    "text",
+    "/regex\\s/",
+    "!/inverseRegex/"
+]
+```
+
+#### passFilter
+```javascript
+passFilter(item, flist)
+```
+A basic, but very quick exclusion filter
+- Returns: `<Boolean>`
+- item `<String>` The string we're looking for
+- flist `<Array>` An array of regular expressions to test, matching items will be filtered (dropped)
+Where the filter regex is of the following format:
 ```json
 "filters": [
     "'^tcmalloc'",
