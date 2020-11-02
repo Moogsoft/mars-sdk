@@ -283,6 +283,10 @@ describe('utilities', () => {
         expect(utils.passFilter('hello', ['/h*/', '/\\w/'])).toBe(true);
     });
 
+    it('isInFilter', () => {
+        expect(utils.isInFilter('hello', ['/h*/', '/\\w/'])).toBe(true);
+    });
+
     it('toHex', () => {
         expect(utils.toHex(1)).toBe('0x1');
         expect(utils.toHex(15)).toBe('0xf');
