@@ -59,7 +59,7 @@ const Event = require('@moogsoft/mars-sdk/Event');
 - [JSONToKv](#JSONToKv)
 - [dehumanize](#dehumanize)
 - [jsonParse](#jsonParse)
-- [isInFilter](#isInFilter)
+- [isInFilters](#isInFilters)
 - [passFilter](#passFilter)
 ### Extended Utilities
 #### REST
@@ -404,14 +404,14 @@ A wrappper for JSON.parse with error handling
 - Returns: `<Object>`
 - string: Input JSON as a string
 
-#### isInFilter
+#### isInFilters
 ```javascript
-passFilter(item, filterList)
+isInFilters(item, filterList)
 ```
-A basic, but very quick exclusion filter
+A filter utility that evaluates against lists of strings or regex
 - Returns: `<Boolean>`
 - item `<String>` The string we're looking for
-- filterList `<Array>` An array of regular expressions to test, matching items will be filtered (dropped)
+- filterList `<Array>` An array of regular expressions or stringto test
 *Example*
 ```javascript
 mongoStat.filter((m) => passFilter(m.name, filters)).forEach((m) => {
