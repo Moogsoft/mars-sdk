@@ -472,6 +472,54 @@ function passFilter(item, flist) {
 }
 
 /**
+ * Filter based on an array of regex
+ *
+ * @param {string} item - The namespacestring we're testing
+ * @param {array} flist - The array containing the list of strings or regex's
+ * @returns {boolean}
+ */
+function isInFilters(item, filters) {
+    // Return true if the item
+    // is either an equality match or
+    // a regex match in the filters.
+
+    if (!Array.isArray(filters)) {
+        return false;
+    }
+
+    const inFilters = false;
+
+    for (let fIdx = 0; fIdx < filters.length; fIdx += 1) {
+        const filter = filters[fIdx];
+        if (/^(!)?\/.*\/$/.test(filter)) {
+            const filterExtract = /^(?:!)?\/(.*)\/$/.exec(filter);
+            try {
+                const filterRe = new RegExp(filterExtract[1]);
+                if (/^!/.test(filter)) {
+                    // Testing for a not match
+                    if (!filterRe.test(item)) {
+                        debug(`${item} matches regex !${filterRe}`);
+                        return true;
+                    }
+                    debug(`${item} excluded by not regex !${filterRe}`);
+                } else if (filterRe.test(item)) {
+                    debug(`${item} matches regex ${filterRe}`);
+                    return true;
+                } else {
+                    debug(`${item} does not match regex ${filterRe}`);
+                }
+            } catch (e) {
+                warn(`Failed to construct a regular expression from ${filterExtract[1]} ${e}`);
+            }
+        } else if (item === filter) {
+            debug(`${item} has equality with ${filter}`);
+            return true;
+        }
+    }
+    return inFilters;
+}
+
+/**
  * Return the current MAR directory the collector was found in
  */
 function getMarDir() {
@@ -483,6 +531,8 @@ function getMarDir() {
  */
 module.exports = {
     isWindows,
+    isLinux,
+    isMacOS,
     toHex,
     isHex,
     hasCmd,
@@ -504,7 +554,6 @@ module.exports = {
     dehumanize,
     carousel,
     passFilter,
+    isInFilters,
     getMarDir,
-    isLinux,
-    isMacOS,
 };
