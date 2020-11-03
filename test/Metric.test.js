@@ -65,7 +65,7 @@ describe('Validation Method', () => {
             .setSource('localhost')
             .setData(NaN);
 
-        expect(() => invalidMetric.validate()).toThrow('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
+        expect(() => invalidMetric.validate()).toThrow('Field `data` may not be NaN');
     });
 
     it('validate: missing metric name', () => {
