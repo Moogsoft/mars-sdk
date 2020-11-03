@@ -208,6 +208,8 @@ class Metric {
             this.data.validate();
         } else if (!['number', 'boolean'].includes(typeof this.data) && !isHex(this.data)) {
             throw new Error('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
+        } else if (Number.isNaN(this.data)) {
+            throw new Error('Field `data` may not be NaN');
         }
 
         if (typeof this.metric !== 'string') {
