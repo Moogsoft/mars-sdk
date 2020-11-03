@@ -59,6 +59,15 @@ describe('Validation Method', () => {
         expect(() => invalidMetric.validate()).toThrow('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
     });
 
+    it('validate: NaN value', () => {
+        const invalidMetric = new Metric()
+            .setMetric('valid.metric.1')
+            .setSource('localhost')
+            .setData(NaN);
+
+        expect(() => invalidMetric.validate()).toThrow('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
+    });
+
     it('validate: missing metric name', () => {
         const invalidMetric = new Metric()
             .setSource('localhost')
