@@ -13,6 +13,7 @@ const MISSING_COMMAND = 'Missing Command';
 const NO_HTTP_RESPONSE = 'No http(s) response';
 const MISSING_CONFIG = 'Missing configuration item';
 const INVALID_CONFIG = 'Invalid configuration value';
+const TIMEOUT = 'Timeout';
 const COUNTER = 'c';
 const GAUGE = 'g';
 
@@ -25,6 +26,7 @@ module.exports = {
     NO_HTTP_RESPONSE,
     MISSING_CONFIG,
     INVALID_CONFIG,
+    TIMEOUT,
     COUNTER,
     GAUGE,
 };
