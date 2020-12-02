@@ -160,6 +160,56 @@ class Event {
         return this;
     }
 
+
+    /**
+     * Populate an event from an object with the same key names,
+     * @param {object} object - the object to create the event with.
+     */
+
+    static from(sourceObject) {
+        const event = new Event();
+        if (typeof sourceObject.severity !== 'undefined') {
+            event.setSeverity(sourceObject.severity);
+        }
+        if (typeof sourceObject.source !== 'undefined') {
+            event.setSource(sourceObject.source);
+        }
+        if (typeof sourceObject.check !== 'undefined') {
+            event.setCheck(sourceObject.check);
+        }
+        if (typeof sourceObject.description !== 'undefined') {
+            event.setDescription(sourceObject.description);
+        }
+        if (typeof sourceObject.time !== 'undefined') {
+            event.setTime(sourceObject.time);
+        }
+        if (typeof sourceObject.utc_offset !== 'undefined') {
+            event.setUtcOffset(sourceObject.utc_offset);
+        }
+        if (typeof sourceObject.dedupe_key !== 'undefined') {
+            event.setDedupeKey(sourceObject.dedupe_key);
+        }
+        if (typeof sourceObject.dedup_key !== 'undefined') {
+            event.setDedupeKey(sourceObject.dedup_key);
+        }
+        if (typeof sourceObject.manager !== 'undefined') {
+            event.setManager(sourceObject.manager);
+        }
+        if (typeof sourceObject.service !== 'undefined') {
+            event.setService(sourceObject.service);
+        }
+        if (typeof sourceObject.alias !== 'undefined') {
+            event.setAlias(sourceObject.alias);
+        }
+        if (typeof sourceObject.class !== 'undefined') {
+            event.setClass(sourceObject.class);
+        }
+        if (typeof sourceObject.tags !== 'undefined') {
+            event.setTags(sourceObject.tags);
+        }
+        return event;
+    }
+
     validate() {
         if (this.severity == null) {
             throw new Error('`severity` must be set in an Event');
