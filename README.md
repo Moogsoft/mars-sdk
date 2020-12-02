@@ -337,6 +337,20 @@ An "extended" class to generate a well formed Event to be used by the [sendEvent
         - clazz: `<String>` [Optional] The class of this event, for example Storage, AWS, Network, etc
     - `.setTags(tags)`
         - tags: `<Object>` [Optional] Key-value pairs of metadata for the event
+    - `.from(object)`
+        - object: `<Object>` Create an Event from an  object. The source object is expected to have the same property names as the Event. Missing properties will be ignored (left as the default undefined). 
+            - severity 
+            - source 
+            - check 
+            - description 
+            - time 
+            - utc_offset 
+            - dedupe_key 
+            - manager 
+            - service 
+            - alias 
+            - class
+            - tags
 
 #### Bitmask
 An "extended" class to generate a well formed Bitmask metric to be used by the [sendMetrics()]($sendmetrics) method
