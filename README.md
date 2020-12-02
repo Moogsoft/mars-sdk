@@ -270,6 +270,20 @@ An "extended" class to generate a well formed Metric to be used by the [sendMetr
         - Sets the metric `type` to gauge
     - `.counter()`
         - Sets the metric `type` to counter
+    - `.from(object)`
+        - object: `<Object>` Create a Metric from an object. The source object is expected to have the same property names as the Metric. Missing properties will be ignored (left as the default undefined).
+          - data
+          - metric
+          - source
+          - key
+          - utc_offset
+          - description
+          - additional_data
+          - tags
+          - type
+          - unit
+          - window 
+          - time
 
 *Example*
 ```javascript
