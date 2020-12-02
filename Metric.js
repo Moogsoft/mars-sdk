@@ -199,6 +199,52 @@ class Metric {
     }
 
     /**
+     * Populate a metric from an object with the same key names,
+     * @param {object} object - the object to create the event with.
+     */
+
+    static from(sourceObject) {
+        const metric = new Metric();
+        if (typeof sourceObject.data !== 'undefined') {
+            metric.setData(sourceObject.data);
+        }
+        if (typeof sourceObject.metric !== 'undefined') {
+            metric.setMetric(sourceObject.metric);
+        }
+        if (typeof sourceObject.source !== 'undefined') {
+            metric.setSource(sourceObject.source);
+        }
+        if (typeof sourceObject.key !== 'undefined') {
+            metric.setKey(sourceObject.key);
+        }
+        if (typeof sourceObject.utc_offset !== 'undefined') {
+            metric.setUtcOffset(sourceObject.utc_offset);
+        }
+        if (typeof sourceObject.description !== 'undefined') {
+            metric.setDescription(sourceObject.description);
+        }
+        if (typeof sourceObject.additional_data !== 'undefined') {
+            metric.setAdditionalData(sourceObject.additional_data);
+        }
+        if (typeof sourceObject.tags !== 'undefined') {
+            metric.setTags(sourceObject.tags);
+        }
+        if (typeof sourceObject.type !== 'undefined') {
+            metric.setType(sourceObject.type);
+        }
+        if (typeof sourceObject.unit !== 'undefined') {
+            metric.setUnit(sourceObject.unit);
+        }
+        if (typeof sourceObject.window !== 'undefined') {
+            metric.setWindow(sourceObject.window);
+        }
+        if (typeof sourceObject.time !== 'undefined') {
+            metric.setTime(sourceObject.time);
+        }
+        return metric;
+    }
+
+    /**
      * Validates the metric, confirming it has values for
      * required fields, and provided values are appropriately typed
      */
