@@ -58,6 +58,28 @@ describe('Log Methods', () => {
 
         expect(actual).toStrictEqual({ type: 'log', level: 'error', msg: 'test' });
     });
+
+    it('info: log object', () => {
+        // Write and capture the output
+        const output = stdout.inspectSync(() => {
+            utils.info({ key: "value" });
+        });
+
+        const actual = JSON.parse(output);
+
+        expect(actual).toStrictEqual({ type: 'log', level: 'info', msg: '{\"key\":\"value\"}' });
+    });
+
+    it('debug: log array', () => {
+        // Write and capture the output
+        const output = stdout.inspectSync(() => {
+            utils.debug([1, 2, 3]);
+        });
+
+        const actual = JSON.parse(output);
+
+        expect(actual).toStrictEqual({ type: 'log', level: 'debug', msg: '[1,2,3]' });
+    });
 });
 
 describe('Sender Methods', () => {
