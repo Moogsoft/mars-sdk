@@ -19,35 +19,49 @@ let MOOG_CREDS_AND_CONFIG = null;
 
 /**
  * Logging commands, they all wrap messages in markers that we can
- * disambiguate on the java side to log out at certain levels
+ * disambiguate on the collector side to log out at certain levels
  */
+
+/**
+ * Logs a message to be consumed by the collector
+ *
+ * @param {String} level level to log at
+ * @param {String} msg message to be logged
+ */
+function log(level, msg) {
+    let message = msg;
+    if (typeof msg !== 'string') {
+        message = JSON.stringify(msg);
+    }
+    process.stdout.write(`${JSON.stringify({ type: 'log', level, msg: message })}\n`);
+}
 
 /**
  * Info
  */
 function info(msg) {
-    process.stdout.write(`${JSON.stringify({ type: 'log', level: 'info', msg })}\n`);
+    log('info', msg);
 }
 
 /**
  * Debug
  */
 function debug(msg) {
-    process.stdout.write(`${JSON.stringify({ type: 'log', level: 'debug', msg })}\n`);
+    log('debug', msg);
 }
 
 /**
  * Warn
  */
 function warn(msg) {
-    process.stdout.write(`${JSON.stringify({ type: 'log', level: 'warn', msg })}\n`);
+    log('warn', msg);
 }
 
 /**
  * Error
  */
 function error(msg) {
-    process.stdout.write(`${JSON.stringify({ type: 'log', level: 'error', msg })}\n`);
+    log('error', msg);
 }
 
 // Helper functions
