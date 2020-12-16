@@ -62,12 +62,12 @@ describe('Log Methods', () => {
     it('info: log object', () => {
         // Write and capture the output
         const output = stdout.inspectSync(() => {
-            utils.info({ key: "value" });
+            utils.info({ key: 'value' });
         });
 
         const actual = JSON.parse(output);
 
-        expect(actual).toStrictEqual({ type: 'log', level: 'info', msg: '{\"key\":\"value\"}' });
+        expect(actual).toStrictEqual({ type: 'log', level: 'info', msg: '{"key":"value"}' });
     });
 
     it('debug: log array', () => {
