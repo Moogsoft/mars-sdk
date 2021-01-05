@@ -188,7 +188,7 @@ function isHex(input) {
  * Gets the config sent from the collector and parses it as JSON
  */
 
-function getConfig(configFile) {
+function getConfig(moobName) {
     if (MOOG_CREDS_AND_CONFIG === null) {
         // eslint-disable-next-line no-underscore-dangle
         if (process.stdin._readableState.highWaterMark > 0) {
@@ -209,8 +209,8 @@ function getConfig(configFile) {
         // parse and send.
         // Config directory is fixed as $MOOGSOFT_HOME/collector/config
 
-        if (!configFile) {
-            info('No config file specified, no config file check will be done');
+        if (!moobName) {
+            info('No moob name specified, no config file check will be done');
             return {};
         }
 
@@ -219,7 +219,7 @@ function getConfig(configFile) {
             return {};
         }
 
-        const configFileName = `${process.env.MOOGSOFT_HOME}/collector/config/${configFile}`;
+        const configFileName = `${process.env.MOOGSOFT_HOME}/collector/config/${moobName}.conf`;
 
         try {
             fs.accessSync(configFileName, fs.constants.R_OK);
