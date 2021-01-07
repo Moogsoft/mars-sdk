@@ -185,6 +185,13 @@ function isHex(input) {
 }
 
 /**
+ * Return the current MAR directory the collector was found in
+ */
+function getMarDir() {
+    return path.dirname(process.argv[1]);
+}
+
+/**
  * Gets the config sent from the collector and parses it as JSON
  */
 
@@ -207,19 +214,15 @@ function getConfig(moobName) {
     ) {
         // Check to see if there is a local config file we can
         // parse and send.
-        // Config directory is fixed as $MOOGSOFT_HOME/collector/config
+        // Config directory is fixed as $MAR_DIR/config
 
         if (!moobName) {
             info('No moob name specified, no config file check will be done');
             return {};
         }
 
-        if (!process.env.MOOGSOFT_HOME) {
-            warn('MOOGSOFT_HOME environment variable not set, unable to determine config');
-            return {};
-        }
-
-        const configFileName = `${process.env.MOOGSOFT_HOME}/collector/config/${moobName}.conf`;
+        const marDir = getMarDir();
+        const configFileName = `${marDir}/config/${moobName}.conf`;
 
         try {
             fs.accessSync(configFileName, fs.constants.R_OK);
@@ -570,13 +573,6 @@ function isInFilters(item, filters) {
         }
     }
     return inFilters;
-}
-
-/**
- * Return the current MAR directory the collector was found in
- */
-function getMarDir() {
-    return path.dirname(process.argv[1]);
 }
 
 /**
