@@ -160,7 +160,6 @@ class Event {
         return this;
     }
 
-
     /**
      * Populate an event from an object with the same key names,
      * @param {object} object - the object to create the event with.
