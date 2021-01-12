@@ -17,6 +17,9 @@ module.exports = {
         ecmaVersion: 2020,
         sourceType: 'script',
     },
+    ignorePatterns: [
+        'jest.config.js',
+    ],
     rules: {
         indent: ['error', 4, {
             SwitchCase: 1,
