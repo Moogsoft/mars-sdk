@@ -1,6 +1,6 @@
 # The mars-sdk
 
-![.github/workflows/test.yml](https://github.com/Moogsoft/mars-sdk/workflows/.github/workflows/test.yml/badge.svg)
+![Test](https://github.com/Moogsoft/mars-sdk/workflows/.github/workflows/Test.yml/badge.svg)
 
 
 A library of utilities intended to make the development of collector node.js script both easier, and more robust.
