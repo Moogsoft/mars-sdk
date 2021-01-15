@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks out a copy of your repository on the ubuntu-latest machine and runs the tests with coverage and generates badges
+      # Checks out a copy of your repository on the ubuntu-latest machine and runs the tests with coverage
       - name: Test
         uses: actions/checkout@v2
       - run: npm install
