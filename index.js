@@ -7,6 +7,7 @@
 const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const hjson = require('hjson');
 
 const constants = fs.constants || fs;
 
@@ -184,9 +185,17 @@ function isHex(input) {
 }
 
 /**
+ * Return the current MAR directory the collector was found in
+ */
+function getMarDir() {
+    return path.dirname(process.argv[1]);
+}
+
+/**
  * Gets the config sent from the collector and parses it as JSON
  */
-function getConfig() {
+
+function getConfig(moobName) {
     if (MOOG_CREDS_AND_CONFIG === null) {
         // eslint-disable-next-line no-underscore-dangle
         if (process.stdin._readableState.highWaterMark > 0) {
@@ -203,7 +212,40 @@ function getConfig() {
         || !MOOG_CREDS_AND_CONFIG.config
         || !(typeof MOOG_CREDS_AND_CONFIG.config === 'object')
     ) {
-        return {};
+        // Check to see if there is a local config file we can
+        // parse and send.
+        // Config directory is fixed as $MAR_DIR/config
+
+        if (!moobName) {
+            info('No moob name specified, no config file check will be done');
+            return {};
+        }
+
+        const marDir = getMarDir();
+        const configFileName = `${marDir}/config/${moobName}.conf`;
+
+        try {
+            fs.accessSync(configFileName, fs.constants.R_OK);
+        } catch (existError) {
+            warn(`Could not find config file: ${configFileName} : ${existError.message} `);
+            return {};
+        }
+
+        let configFileContents;
+        try {
+            configFileContents = fs.readFileSync(configFileName, 'utf8');
+        } catch (readError) {
+            warn(`Could not read config file: ${configFileName} : ${readError.message} `);
+            return {};
+        }
+
+        try {
+            const configJson = hjson.parse(configFileContents);
+            return configJson;
+        } catch (parseError) {
+            warn(`Could not parse config file: ${configFileName} : ${parseError.message} `);
+            return {};
+        }
     }
     return MOOG_CREDS_AND_CONFIG.config;
 }
@@ -531,13 +573,6 @@ function isInFilters(item, filters) {
         }
     }
     return inFilters;
-}
-
-/**
- * Return the current MAR directory the collector was found in
- */
-function getMarDir() {
-    return path.dirname(process.argv[1]);
 }
 
 /**
