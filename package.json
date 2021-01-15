@@ -9,6 +9,7 @@
     },
     "scripts": {
         "test": "jest",
+        "test:coverage": "npm test -- --coverage",
         "lint": "eslint . --ext .js"
     },
     "contributors": [

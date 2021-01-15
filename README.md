@@ -1,5 +1,8 @@
 # The mars-sdk
 
+![Test](https://github.com/Moogsoft/mars-sdk/workflows/Test/badge.svg)
+
+
 A library of utilities intended to make the development of collector node.js script both easier, and more robust.
 
 The core utilities can be required and used in the simple form:
