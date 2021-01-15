@@ -17,6 +17,6 @@ jobs:
       - name: Test
         uses: actions/checkout@v2
       - run: npm install
-      - run: npm run test:badges
+      - run: npm test
         env:
             CI: true
