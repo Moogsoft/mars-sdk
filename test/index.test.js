@@ -306,7 +306,11 @@ describe('utilities', () => {
     });
 
     it('isInFilters', () => {
+        // suppress output
+        const originalWrite = process.stdout.write;
+        process.stdout.write = jest.fn();
         expect(utils.isInFilters('hello', ['/h*/', '/\\w/'])).toBe(true);
+        process.stdout.write = originalWrite;
     });
 
     it('toHex', () => {
