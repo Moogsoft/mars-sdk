@@ -4,6 +4,7 @@ module.exports = {
         "*.js",
         "!jest.config.js",
         "!.eslintrc.js",
+        "!constants.js"
     ],
     coverageReporters: [
         'json-summary',
