@@ -203,7 +203,6 @@ function getConfig(moobName) {
     if (MOOG_CREDS_AND_CONFIG === null) {
         // TODO: This check for process.stdin.readableHighWaterMark is probably unnecessary. We
         // could easily just wrap the readFileSync into the try/catch.
-        // eslint-disable-next-line no-underscore-dangle
         if (process.stdin.readableHighWaterMark > 0) {
             const buf = fs.readFileSync(process.stdin.fd, 'utf8');
             try {
@@ -263,7 +262,6 @@ function getCredentials() {
     if (MOOG_CREDS_AND_CONFIG === null) {
         // TODO: This check for process.stdin.readableHighWaterMark is probably unnecessary. We
         // could easily just wrap the readFileSync into the try/catch.
-        // eslint-disable-next-line no-underscore-dangle
         if (process.stdin.readableHighWaterMark > 0) {
             const buf = fs.readFileSync(process.stdin.fd, 'utf8');
             try {
