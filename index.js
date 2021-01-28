@@ -3,8 +3,7 @@
 /**
  * Helper functions for our MARs
  */
-
-const { execSync, spawnSync } = require('child_process');
+const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const hjson = require('hjson');
@@ -92,6 +91,11 @@ function fileExists(commandName) {
  */
 function canRun(cmd) {
     try {
+        // TODO: I'm pretty sure this is a bug, but need to know more to fix it.
+        // From the Node.js docs, it seems that constants.F_OK is always set, so
+        // this logical OR is useless. Also, on windows, constants.X_OK (execute
+        // permissions) falls back to using constants.F_OK (file visibility). It
+        // seems that we are never actually checking if a file can be run.
         fs.accessSync(cmd, constants.F_OK || constants.X_OK);
         return true;
     } catch (e) {
@@ -111,7 +115,7 @@ function hasCmd(cmd) {
             cmdString = `command -v ${cmd} 2>/dev/null && { echo >&1 ${cmd}; exit 0; }`;
         }
         try {
-            return !!execSync(cmdString);
+            return !!childProcess.execSync(cmdString);
         } catch (e) {
             return false;
         }
@@ -131,7 +135,7 @@ function procRunning(proc) {
         procString = `pgrep ${proc}`;
     }
     try {
-        return !!execSync(procString);
+        return !!childProcess.execSync(procString);
     } catch (e) {
         return false;
     }
@@ -141,7 +145,7 @@ function procRunning(proc) {
  * Executes a function and returns a map of stdout, stderr, and the status
  */
 function exec(cmd, args) {
-    const { stdout, stderr, status } = spawnSync(cmd, args, { shell: true });
+    const { stdout, stderr, status } = childProcess.spawnSync(cmd, args, { shell: true });
 
     return {
         status,
@@ -197,8 +201,9 @@ function getMarDir() {
 
 function getConfig(moobName) {
     if (MOOG_CREDS_AND_CONFIG === null) {
-        // eslint-disable-next-line no-underscore-dangle
-        if (process.stdin._readableState.highWaterMark > 0) {
+        // TODO: This check for process.stdin.readableHighWaterMark is probably unnecessary. We
+        // could easily just wrap the readFileSync into the try/catch.
+        if (process.stdin.readableHighWaterMark > 0) {
             const buf = fs.readFileSync(process.stdin.fd, 'utf8');
             try {
                 MOOG_CREDS_AND_CONFIG = JSON.parse(buf.toString());
@@ -255,8 +260,9 @@ function getConfig(moobName) {
  */
 function getCredentials() {
     if (MOOG_CREDS_AND_CONFIG === null) {
-        // eslint-disable-next-line no-underscore-dangle
-        if (process.stdin._readableState.highWaterMark > 0) {
+        // TODO: This check for process.stdin.readableHighWaterMark is probably unnecessary. We
+        // could easily just wrap the readFileSync into the try/catch.
+        if (process.stdin.readableHighWaterMark > 0) {
             const buf = fs.readFileSync(process.stdin.fd, 'utf8');
             try {
                 MOOG_CREDS_AND_CONFIG = JSON.parse(buf.toString());

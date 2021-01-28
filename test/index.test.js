@@ -2,11 +2,33 @@
 
 'use strict';
 
-const utils = require('../index');
+const fs = require('fs');
+const path = require('path');
+const childProcess = require('child_process');
 const { Metric } = require('../Metric');
 const { Event } = require('../Event');
 const { DiscoveryResult } = require('../DiscoveryResult');
 const { Reason } = require('../Reason');
+
+const utils = require('../index');
+
+jest.mock('path', () => ({
+    dirname: jest.fn(),
+}));
+
+jest.mock('fs', () => ({
+    constants: {
+        F_OK: 'F_OK',
+        X_OK: 'X_OK',
+        R_OK: 'R_OK',
+    },
+    accessSync: jest.fn(),
+    readFileSync: jest.fn(),
+}));
+
+afterEach(() => {
+    jest.resetAllMocks();
+});
 
 describe('Log Methods', () => {
     let stdout;
@@ -187,11 +209,13 @@ describe('Sender Methods', () => {
             .setDescription(`test${i}`)
             .setCheck('test'));
 
+        events.push('ignored');
+
         const output = stdout.inspectSync(() => {
             utils.sendEvents(events);
         });
 
-        const actual = JSON.parse(output);
+        const actual = JSON.parse(output[1]);
 
         expect(actual).toStrictEqual({
             type: 'events',
@@ -226,6 +250,16 @@ describe('Sender Methods', () => {
         };
 
         expect(actual).toStrictEqual([one, two, three]);
+    });
+
+    it('sendEvents: empty', () => {
+        const output = stdout.inspectSync(() => {
+            utils.sendEvents();
+        });
+
+        const actual = JSON.parse(output);
+
+        expect(actual.msg).toMatch('Received null events, skipping');
     });
 
     it('sendDiscovery: inactive', () => {
@@ -285,13 +319,69 @@ describe('Sender Methods', () => {
 });
 
 describe('utilities', () => {
+    describe('hasCmd', () => {
+        let execSpy;
+        beforeEach(() => {
+            execSpy = jest.spyOn(childProcess, 'execSync').mockImplementation(() => true);
+        });
+
+        it('should check if user can run an existing file', () => {
+            expect(utils.hasCmd('guava')).toBe(true);
+            fs.accessSync
+                .mockImplementationOnce(() => true)
+                .mockImplementationOnce(() => {
+                    throw new Error();
+                });
+            expect(utils.hasCmd('pineapple')).toBe(false);
+        });
+
+        it('should build a *nix command', () => {
+            fs.accessSync.mockImplementationOnce(() => {
+                throw new Error();
+            });
+            utils.hasCmd('papaya');
+            expect(execSpy).toHaveBeenCalledWith('command -v papaya 2>/dev/null && { echo >&1 papaya; exit 0; }');
+        });
+
+        it('should failover', () => {
+            fs.accessSync.mockImplementationOnce(() => {
+                throw new Error();
+            });
+            execSpy.mockImplementationOnce(() => {
+                throw new Error();
+            });
+            expect(utils.procRunning('banana')).toBe(false);
+        });
+    });
+
+    describe('procRunning', () => {
+        let execSpy;
+        beforeEach(() => {
+            execSpy = jest.spyOn(childProcess, 'execSync').mockImplementation(() => true);
+        });
+
+        it('should get *nix processes', () => {
+            utils.procRunning('passionfruit');
+            expect(execSpy).toHaveBeenCalledWith('pgrep passionfruit');
+        });
+
+        it('should failover', () => {
+            execSpy.mockImplementation(() => false);
+            expect(utils.procRunning('banana')).toBe(false);
+        });
+    });
+
+    it.todo('exec, but testing anything in child_process is a pain');
+
     it('JSONtoKv', () => {
-        const json = { one: 1, two: 2, nested: { three: 3 } };
+        const json = {
+            one: 1, two: 2, nested: { three: 3 }, string: '$numberlong',
+        };
 
         const array = [];
-        utils.JSONToKv(json, array, (_, val) => 2 * val, undefined);
+        utils.JSONToKv(json, array, (_, val) => 2 + val, undefined);
 
-        expect(array).toStrictEqual([2, 4, 6]);
+        expect(array).toStrictEqual([3, 4, 5, '2$numberlong']);
     });
 
     it('dehumanize', () => {
@@ -305,8 +395,72 @@ describe('utilities', () => {
         expect(utils.passFilter('hello', ['/h*/', '/\\w/'])).toBe(true);
     });
 
-    it('isInFilters', () => {
-        expect(utils.isInFilters('hello', ['/h*/', '/\\w/'])).toBe(true);
+    describe('isInFilters', () => {
+        let originalWrite;
+        beforeEach(() => {
+            originalWrite = process.stdout.write;
+            process.stdout.write = jest.fn(); // shhhh
+        });
+        afterEach(() => {
+            process.stdout.write = originalWrite;
+        });
+        it('should match a simple filter', () => {
+            expect(utils.isInFilters('hello', ['/h*/', '/\\w/'])).toBe(true);
+        });
+        it('should match a not filter', () => {
+            expect(utils.isInFilters('hello', ['!/banana/'])).toBe(true);
+        });
+        it('should match when the filter is identical to the item', () => {
+            expect(utils.isInFilters('hello', ['hello'])).toBe(true);
+        });
+        it('should not match if no filters are provided', () => {
+            expect(utils.isInFilters('hello', [])).toBe(false);
+        });
+        it('should not match if filters are not an array', () => {
+            expect(utils.isInFilters('hello', '/h*/')).toBe(false);
+        });
+    });
+
+    describe('carousel', () => {
+        let stdout;
+        beforeEach(() => {
+            stdout = require('test-console').stdout;
+            jest.useFakeTimers();
+        });
+
+        it('checks that args are the right type', () => {
+            const output = stdout.inspectSync(() => {
+                utils.carousel();
+            });
+            expect(setInterval).not.toHaveBeenCalled();
+            expect(JSON.parse(output[0]).msg).toMatch('Supplied invalid args');
+        });
+
+        it('checks that interval is the right type', () => {
+            const output = stdout.inspectSync(() => {
+                utils.carousel(undefined, undefined, ['foo']);
+            });
+            expect(setInterval).not.toHaveBeenCalled();
+            expect(JSON.parse(output[0]).msg).toMatch('Supplied invalid interval');
+        });
+
+        it('checks that func is the right type', () => {
+            const output = stdout.inspectSync(() => {
+                utils.carousel(100, undefined, ['foo']);
+            });
+            expect(setInterval).not.toHaveBeenCalled();
+            expect(JSON.parse(output[0]).msg).toMatch('Supplied undefined function');
+        });
+
+        it('should call func with each arg over the interval', () => {
+            const func = jest.fn();
+            utils.carousel(100, func, ['foo', 'bar']);
+            expect(setInterval).toHaveBeenCalledTimes(1);
+            jest.runOnlyPendingTimers();
+            expect(func).toHaveBeenCalledWith('foo');
+            jest.runOnlyPendingTimers();
+            expect(func).toHaveBeenCalledWith('bar');
+        });
     });
 
     it('toHex', () => {
@@ -322,5 +476,47 @@ describe('utilities', () => {
         expect(utils.isHex('0xqqq')).toBe(false);
         expect(utils.isHex('')).toBe(false);
         expect(utils.isHex(1)).toBe(false);
+    });
+
+    it('getMarDir', () => {
+        utils.getMarDir();
+        expect(path.dirname).toHaveBeenCalled();
+    });
+
+    describe('getConfig', () => {
+        // testing MOOG_CREDS_AND_CONFIG is *very* difficult, mostly due to the fact that it's
+        // really not the best practice to use the module system as a cache. For now, let's test the
+        // more complicated path.
+        it.todo('should get config via stdin');
+        it('should get config via conf file if no valid stdin is present', () => {
+            path.dirname.mockReturnValue('mardir');
+            fs.readFileSync.mockReturnValue('foo');
+            const res = utils.getConfig('banana');
+            expect(fs.readFileSync).toHaveBeenCalledWith('mardir/config/banana.conf', 'utf8');
+            expect(res).toEqual('foo');
+        });
+    });
+
+    it('getCredentials', () => {
+        fs.readFileSync.mockReturnValue(JSON.stringify({ credentials: { obj: 'creds' }, config: { obj: 'config' } }));
+        const creds = utils.getCredentials();
+        expect(creds).toEqual({ obj: 'creds' });
+    });
+
+    it('registerScheduled', () => {
+        const func = jest.fn();
+        const exitSpy = jest.spyOn(process, 'exit').mockReturnValue();
+        process.argv.push('mockConstructor');
+        utils.registerScheduled(func);
+        expect(func).toHaveBeenCalled();
+        expect(exitSpy).toHaveBeenCalled();
+        exitSpy.mockRestore();
+    });
+
+    it('sendResult', () => {
+        const writeSpy = jest.spyOn(process.stdout, 'write').mockReturnValue();
+        utils.sendResult('{"foo": "bar"}');
+        expect(writeSpy).toHaveBeenCalledWith('{"type":"result","value":{"foo":"bar"}}\n');
+        writeSpy.mockRestore();
     });
 });

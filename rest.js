@@ -221,5 +221,5 @@ module.exports = {
     head,
     post,
     get,
-    buildUrl, // exposed for unit testing.
+    buildUrl,
 };
