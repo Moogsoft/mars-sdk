@@ -216,6 +216,7 @@ function getConfig(moobName) {
         MOOG_CREDS_AND_CONFIG === null
         || !MOOG_CREDS_AND_CONFIG.config
         || !(typeof MOOG_CREDS_AND_CONFIG.config === 'object')
+        || Object.keys(MOOG_CREDS_AND_CONFIG.config).length === 0
     ) {
         // Check to see if there is a local config file we can
         // parse and send.
