@@ -1,5 +1,7 @@
 'use strict';
 
+const { Reason } = require('./Reason');
+
 /**
   * @module DiscoveryResult
   */
@@ -85,7 +87,7 @@ class DiscoveryResult {
             });
         }
 
-        if (this.reasonDetail != null && this.reasonDetail.constructor.name !== 'Reason') {
+        if (this.reasonDetail != null && this.reasonDetail.constructor !== Reason) {
             throw new Error('reason must be of type `Reason`');
         } else if (this.reasonDetail != null) {
             this.reasonDetail.validate();

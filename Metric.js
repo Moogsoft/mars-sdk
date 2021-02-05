@@ -1,12 +1,35 @@
 'use strict';
 
+const { Bitmask } = require('./Bitmask');
+
 /**
  * Metric and associated types for producing time series data from a MAR
  * @module Metric
  */
 /* eslint camelcase: ["error", {allow: ["additional_data"]}] */
 
-const { isHex } = require('./index');
+/**
+ * Checks if the input string is a hex string prefixed with 0x
+ * @param {String} input - the input string
+ * @return {boolean} true iff the string represents a hex string prefixed with 0x
+ *
+ * NOTE: This function needs to live in this file to prevent a circular dependency.
+ */
+function isHex(input) {
+    if (typeof input !== 'string') {
+        return false;
+    }
+
+    // Now that we know it's a string, validate the prefix
+    if (!input.startsWith('0x')) {
+        return false;
+    }
+
+    const stripped = input.substring(2);
+    const parsed = parseInt(stripped, 16);
+
+    return parsed.toString(16) === stripped;
+}
 
 /**
  * Valid metric types
@@ -250,7 +273,7 @@ class Metric {
      */
     validate() {
         // Validate required fields
-        if (this.data && this.data.constructor.name === 'Bitmask') {
+        if (this.data && this.data.constructor === Bitmask) {
             this.data.validate();
         } else if (!['number', 'boolean'].includes(typeof this.data) && !isHex(this.data)) {
             throw new Error('A Bitmask, Number, Hex String, or Boolean value for field `data` is required');
@@ -299,4 +322,5 @@ class Metric {
 
 module.exports = {
     Metric,
+    isHex,
 };
