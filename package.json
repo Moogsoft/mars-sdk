@@ -1,6 +1,6 @@
 {
     "name": "@moogsoft/mars-sdk",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "Utilities to use with Moogsoft Collector MARs",
     "main": "index.js",
     "repository": {
