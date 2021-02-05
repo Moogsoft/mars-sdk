@@ -7,6 +7,9 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const hjson = require('hjson');
+const { DiscoveryResult } = require('./DiscoveryResult');
+const { Metric, isHex } = require('./Metric');
+const { Event } = require('./Event');
 
 const constants = fs.constants || fs;
 
@@ -168,27 +171,6 @@ function toHex(num) {
 }
 
 /**
- * Checks if the input string is a hex string prefixed with 0x
- * @param {String} input - the input string
- * @return {boolean} true iff the string represents a hex string prefixed with 0x
- */
-function isHex(input) {
-    if (typeof input !== 'string') {
-        return false;
-    }
-
-    // Now that we know it's a string, validate the prefix
-    if (!input.startsWith('0x')) {
-        return false;
-    }
-
-    const stripped = input.substring(2);
-    const parsed = parseInt(stripped, 16);
-
-    return parsed.toString(16) === stripped;
-}
-
-/**
  * Return the current MAR directory the collector was found in
  */
 function getMarDir() {
@@ -337,7 +319,7 @@ function sendDiscovery(discovery) {
     // Do some validation
     if (typeof discovery === 'undefined' || discovery === null) {
         debug('Received null discovery result');
-    } else if (discovery.constructor.name !== 'DiscoveryResult') {
+    } else if (discovery.constructor !== DiscoveryResult) {
         error(`Recieved invalid data in \`sendDiscovery\`, value must be a \`DiscoveryResult\` but received: ${typeof discovery}`);
     } else {
         // Validate the result
@@ -368,7 +350,7 @@ function sendMetrics(metrics) {
 
         value = value.filter((m) => {
             try {
-                if (m.constructor.name !== 'Metric') {
+                if (m.constructor !== Metric) {
                     debug('Received element that was not a `Metric`, skipping it');
                     return false;
                 }
@@ -401,7 +383,7 @@ function sendEvents(events) {
 
         value = value.filter((e) => {
             try {
-                if (e.constructor.name !== 'Event') {
+                if (e.constructor !== Event) {
                     debug('Received element that was not an `Event`, skipping it');
                     return false;
                 }
